@@ -12,6 +12,7 @@ const User = mongoose.model("User", {
   password: String,
 });
 
+
 app.post("/register", async (req, res) => {
   try {
     console.log(req.body);
@@ -27,6 +28,7 @@ app.post("/register", async (req, res) => {
         success: false,
         message: "Email is already registered",
       });
+      
     }
     // Create a new user document
     const user = new User({ name: name, email: email, password: password });
@@ -47,8 +49,44 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.post("/login", async (req, res) => {
+  try {
+    console.log(req.body);
+    const email = req.body.email;
+    const password = req.body.password;
+
+    // const { name, email, password } = req.body;
+    const existingUser = await User.findOne({ email: email });
+    
+    if(!existingUser){
+      return res.status(401).json({
+        success: false,
+        message: "User not registered! Please Register",
+      });
+    }
+    if(password === existingUser.password){
+     res.json({
+     success: true,
+      message: "Login success",
+    });
+  }
+  else{
+    res.status(500).json({
+      success: false,
+      message: "Invalid email/password",
+    });
+  }
+  }catch(error){
+    res.status(500).json({
+      success: false,
+      message: "User not registered Please register",
+    });
+  }
+
+});
+
 const corsOptions = {
-  origin: "http://localhost:3000/register", // Replace with the actual origin of your frontend
+  origin: "http://localhost:3000", // Replace with the actual origin of your frontend
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true, // If your frontend sends cookies
   optionsSuccessStatus: 204, // No content response status for preflight requests
